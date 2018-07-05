@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import get_object_or_404
 from django.views.generic import View, ListView
 from django.http import HttpResponse
@@ -12,7 +14,9 @@ class ListUsersView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['profiles'] = UserProfile.objects.all()
+        profiles = UserProfile.objects.all()
+        context['profiles'] = profiles
+        context['winning'] = profiles.order_by('-votes').first()
         return context
 
 
@@ -31,4 +35,9 @@ class GetWinning(View):
 
     def get(self, request, *args, **kwargs):
         winning = UserProfile.objects.order_by('-votes').first()
-        return HttpResponse('')
+        winning = {
+            'name': winning.user.get_full_name(),
+            'image_url': winning.image_url,
+            'votes': winning.votes
+        }
+        return HttpResponse(json.dumps(winning))
