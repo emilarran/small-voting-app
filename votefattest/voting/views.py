@@ -14,7 +14,8 @@ class ListUsersView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        profiles = UserProfile.objects.all()
+        profiles = UserProfile.objects.filter(
+            user__is_superuser=False)
         context['profiles'] = profiles
         context['winning'] = profiles.order_by('-votes').first()
         return context
@@ -34,7 +35,8 @@ class ClapView(View):
 class GetWinning(View):
 
     def get(self, request, *args, **kwargs):
-        winning = UserProfile.objects.order_by('-votes').first()
+        winning = UserProfile.objects.filter(
+            user__is_superuser=False).order_by('-votes').first()
         winning = {
             'name': winning.user.get_full_name(),
             'image_url': winning.image_url,
